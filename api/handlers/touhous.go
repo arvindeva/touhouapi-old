@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/arvindeva/touhouapi/api/data"
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +20,8 @@ type Touhou struct {
 	LastName  string `json:"last_name"`
 }
 
-// loadJSONData loads data from a given filepath and decodes it into the target interface.
+type Touhous []*Touhou
+
 func loadJSONData(filepath string, target interface{}) error {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -38,25 +40,20 @@ func loadJSONData(filepath string, target interface{}) error {
 
 func GetTouhous(w http.ResponseWriter, r *http.Request) {
 	// w.Write([]byte("Getting Touhous"))
-	var touhous []Touhou
-	err := loadJSONData("./data/touhou.json", &touhous)
+	touhous, err := data.LoadTouhousJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(touhous)
+	touhous.ToJSON(w)
 }
 
-// GetTouhouById extracts the path from the URL of the request and gets the last element of the path to retrieve a Touhou by ID.
-//
-// w http.ResponseWriter, r *http.Request. Returns nothing.
 func GetTouhouById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	var touhous []Touhou
-	err := loadJSONData("./data/touhou.json", &touhous)
+	touhous, err := data.LoadTouhousJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -65,7 +62,7 @@ func GetTouhouById(w http.ResponseWriter, r *http.Request) {
 	for _, touhou := range touhous {
 		if touhou.ID == id {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(touhou)
+			touhou.ToJSON(w)
 			return
 		}
 	}
