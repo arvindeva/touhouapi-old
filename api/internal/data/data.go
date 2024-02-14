@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ func (t *Touhous) ToJSON(w io.Writer) error {
 
 func LoadTouhousJSON() (Touhous, error) {
 	var touhous Touhous
-	err := utils.LoadJSONData("./cmd/api/data/touhou.json", &touhous)
+	err := utils.LoadJSONData("./internal/data/touhou.json", &touhous)
 	if err != nil {
 		return nil, err
 	}

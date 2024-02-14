@@ -3,12 +3,13 @@ package main
 import (
 	"net/http"
 
+	"github.com/arvindeva/touhouapi/api/internal/data"
 	"github.com/gorilla/mux"
 )
 
 func (app *application) GetTouhous(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("Handle GET Touhous")
-	touhous, err := LoadTouhousJSON()
+	touhous, err := data.LoadTouhousJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -22,7 +23,7 @@ func (app *application) GetTouhouByID(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("Handle GET Touhou by ID")
 	vars := mux.Vars(r)
 	id := vars["id"]
-	touhous, err := LoadTouhousJSON()
+	touhous, err := data.LoadTouhousJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
