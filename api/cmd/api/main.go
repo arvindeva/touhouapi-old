@@ -44,6 +44,7 @@ func main() {
 	}
 
 	logger.Info("starting server", "addr", srv.Addr)
+	logger.Info("Touhou Project API v1")
 
 	err := srv.ListenAndServe()
 	app.logger.Error(err.Error())
