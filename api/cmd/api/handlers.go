@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/arvindeva/touhouapi/api/internal/data"
 	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) getTouhous(w http.ResponseWriter, r *http.Request) {
-	touhous, err := app.touhous.GetTouhous()
+	touhous, err := app.touhou.GetTouhous()
 	if err != nil {
 		app.logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -28,18 +29,17 @@ func (app *application) getTouhous(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) getTouhouByID(w http.ResponseWriter, r *http.Request) {
-	// When httprouter is parsing a request, the values of any named parameters
-	// will be stored in the request context. We'll talk about request context
-	// in detail later in the book, but for now it's enough to know that you can
-	// use the ParamsFromContext() function to retrieve a slice containing these
-	// parameter names and values like so:
-	params := httprouter.ParamsFromContext(r.Context())
 
-	// We can then use the ByName() method to get the value of the "id" named
-	// parameter from the slice and validate it as normal.
+	params := httprouter.ParamsFromContext(r.Context())
 	id := params.ByName("id")
-	app.logger.Info("HELLO")
-	touhou, err := app.touhous.GetTouhouByID(id)
+	idInt, err := strconv.Atoi(id)
+	if err != nil || idInt < 1 {
+		app.logger.Error("Error converting id to integer:", err)
+		app.notFound(w, r)
+		return
+	}
+
+	touhou, err := app.touhou.GetTouhouByID(id)
 	if err != nil {
 		app.logger.Error(err.Error())
 		if errors.Is(err, data.ErrNoRecord) {
