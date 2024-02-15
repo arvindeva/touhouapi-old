@@ -22,8 +22,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Welcome to the Touhou API Project")
 	})
-	router.HandlerFunc(http.MethodGet, "/touhou", app.getTouhous)
-	router.HandlerFunc(http.MethodGet, "/touhou/:id", app.getTouhouByID)
+	router.HandlerFunc(http.MethodGet, "/touhou/", app.getTouhous)
+	router.HandlerFunc(http.MethodGet, "/touhou/:id/", app.getTouhouByID)
 
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
