@@ -20,7 +20,10 @@ func (app *application) routes() http.Handler {
 	})
 
 	router.HandlerFunc(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Welcome to the Touhou API Project")
+		_, err := io.WriteString(w, "Welcome to the Touhou API Project")
+		if err != nil {
+			app.logger.Info("Something went wrong")
+		}
 	})
 	router.HandlerFunc(http.MethodGet, "/touhou/", app.getTouhous)
 	router.HandlerFunc(http.MethodGet, "/touhou/:id/", app.getTouhouByID)
