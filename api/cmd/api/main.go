@@ -6,14 +6,13 @@ import (
 	"os"
 
 	"github.com/arvindeva/touhouapi/api/internal/data"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 type application struct {
 	logger  *slog.Logger
 	touhous *data.TouhouModel
-	router  *mux.Router
+	router  http.Handler
 }
 
 func init() {

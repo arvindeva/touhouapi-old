@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	"github.com/arvindeva/touhouapi/api/internal/data"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) GetTouhous(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("Handle GET Touhous")
+func (app *application) getTouhous(w http.ResponseWriter, r *http.Request) {
 	touhous, err := app.touhous.GetTouhous()
 	if err != nil {
 		app.logger.Error(err.Error())
@@ -28,10 +27,18 @@ func (app *application) GetTouhous(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) GetTouhouByID(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("Handle GET Touhou by ID")
-	vars := mux.Vars(r)
-	id := vars["id"]
+func (app *application) getTouhouByID(w http.ResponseWriter, r *http.Request) {
+	// When httprouter is parsing a request, the values of any named parameters
+	// will be stored in the request context. We'll talk about request context
+	// in detail later in the book, but for now it's enough to know that you can
+	// use the ParamsFromContext() function to retrieve a slice containing these
+	// parameter names and values like so:
+	params := httprouter.ParamsFromContext(r.Context())
+
+	// We can then use the ByName() method to get the value of the "id" named
+	// parameter from the slice and validate it as normal.
+	id := params.ByName("id")
+	app.logger.Info("HELLO")
 	touhou, err := app.touhous.GetTouhouByID(id)
 	if err != nil {
 		app.logger.Error(err.Error())

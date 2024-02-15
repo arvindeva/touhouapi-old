@@ -4,18 +4,20 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter" // New import
+	"github.com/justinas/alice"
 )
 
-func (app *application) routes() *mux.Router {
-	router := mux.NewRouter()
-	router.StrictSlash(true)
+func (app *application) routes() http.Handler {
+	router := httprouter.New()
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandlerFunc(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Welcome to the Touhou API Project")
 	})
-	router.HandleFunc("/touhou", app.GetTouhous)
-	router.HandleFunc("/touhou/{id}", app.GetTouhouByID)
+	router.HandlerFunc(http.MethodGet, "/touhou", app.getTouhous)
+	router.HandlerFunc(http.MethodGet, "/touhou/:id", app.getTouhouByID)
 
-	return router
+	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+
+	return standard.Then(router)
 }
