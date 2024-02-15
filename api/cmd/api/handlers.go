@@ -10,6 +10,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *application) getTouhous(w http.ResponseWriter, r *http.Request) {
 	touhous, err := app.touhou.GetTouhous()
 	if err != nil {
