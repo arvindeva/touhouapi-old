@@ -1,9 +1,6 @@
 package data
 
 import (
-	"encoding/json"
-	"io"
-
 	"github.com/arvindeva/touhouapi/api/utils"
 )
 
@@ -13,22 +10,25 @@ type Touhou struct {
 	LastName  string `json:"last_name"`
 }
 
-type Touhous []*Touhou
+type TouhouModel struct{}
 
-func (t *Touhou) ToJSON(w io.Writer) error {
-	encoder := json.NewEncoder(w)
-	err := encoder.Encode(t)
-	return err
+func (m *TouhouModel) GetTouhouByID(id string) (Touhou, error) {
+	var touhous []*Touhou
+	err := utils.LoadJSONData("./internal/data/touhou.json", &touhous)
+	if err != nil {
+		return Touhou{}, err
+	}
+
+	for _, touhou := range touhous {
+		if touhou.ID == id {
+			return *touhou, nil
+		}
+	}
+	return Touhou{}, ErrNoRecord
 }
 
-func (t *Touhous) ToJSON(w io.Writer) error {
-	encoder := json.NewEncoder(w)
-	err := encoder.Encode(t)
-	return err
-}
-
-func LoadTouhousJSON() (Touhous, error) {
-	var touhous Touhous
+func (m *TouhouModel) GetTouhous() ([]*Touhou, error) {
+	var touhous []*Touhou
 	err := utils.LoadJSONData("./internal/data/touhou.json", &touhous)
 	if err != nil {
 		return nil, err

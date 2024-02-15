@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/arvindeva/touhouapi/api/internal/data"
@@ -9,33 +11,46 @@ import (
 
 func (app *application) GetTouhous(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("Handle GET Touhous")
-	touhous, err := data.LoadTouhousJSON()
+	touhous, err := app.touhous.GetTouhous()
 	if err != nil {
+		app.logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	touhous.ToJSON(w)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(touhous)
+	if err != nil {
+		app.logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *application) GetTouhouByID(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("Handle GET Touhou by ID")
 	vars := mux.Vars(r)
 	id := vars["id"]
-	touhous, err := data.LoadTouhousJSON()
+	touhou, err := app.touhous.GetTouhouByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for _, touhou := range touhous {
-		if touhou.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			touhou.ToJSON(w)
+		app.logger.Error(err.Error())
+		if errors.Is(err, data.ErrNoRecord) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 
-	http.NotFound(w, r)
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(touhou)
+	if err != nil {
+		app.logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }

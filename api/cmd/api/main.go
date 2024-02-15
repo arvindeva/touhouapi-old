@@ -1,17 +1,19 @@
 package main
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/arvindeva/touhouapi/api/internal/data"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 type application struct {
-	logger *slog.Logger
+	logger  *slog.Logger
+	touhous *data.TouhouModel
+	router  *mux.Router
 }
 
 func init() {
@@ -27,22 +29,15 @@ func main() {
 		return
 	}
 
-	l := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	app := &application{
-		logger: logger,
+		logger:  logger,
+		touhous: &data.TouhouModel{},
 	}
-	router := mux.NewRouter()
-	router.StrictSlash(true)
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Welcome to the Touhou API Project")
-	})
-	router.HandleFunc("/touhou", app.GetTouhous)
-	router.HandleFunc("/touhou/{id}", app.GetTouhouByID)
+	app.router = app.routes()
 
-	err := http.ListenAndServe(":"+port, router)
-	l.Error(err.Error())
+	err := http.ListenAndServe(":"+port, app.router)
+	app.logger.Error(err.Error())
 	os.Exit(1)
 }
